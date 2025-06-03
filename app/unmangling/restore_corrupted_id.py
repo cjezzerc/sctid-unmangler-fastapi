@@ -1,3 +1,5 @@
+import re
+
 from . import checkdigit
 
 def check_if_in_release(sctid=None, ds=None, sct_version=None):
@@ -35,6 +37,10 @@ def convert_to_dict(sctid, mangled, RC, RD, RC_in_release, RD_in_release):
 def detect_corruption_and_restore_id(sctid=None, ds=None, sct_version=None):
     
     sctid=str(sctid) # in case test with an int
+
+    # can't be excel corruption if not purely digits
+    if (re.search(r'^[0-9]+$', sctid.strip() )) is None:
+        return convert_to_dict(sctid, False, None, None, None, None)
     
     # can't be excel corruption if not 16, 17 or 18 digits
     n_digits=len(sctid)
