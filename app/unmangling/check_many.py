@@ -20,7 +20,7 @@ def parse_line(line=None):
         sctid=f[0]
     else: 
         sctid=""
-    rest_of_line=line[len(sctid):].strip()   
+    rest_of_line=line.strip()[len(sctid):]  
     return sctid, rest_of_line   
 
 def check_entered_data(text=None):
