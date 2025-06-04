@@ -27,9 +27,14 @@ def check_entered_data(text=None):
     for react_id, line in enumerate(text.split('\n')):
         sctid, rest_of_line=parse_line(line)
         mangling_analysis=detect_corruption_and_restore_id(sctid=sctid)
+        
         mangling_analysis["rest_of_line"]=rest_of_line
+        
         parsed_sctid=ParsedSCTID(string=str(sctid))
         mangling_analysis["validity"]=parsed_sctid.valid
         mangling_analysis["id"]=react_id
+        
         results.append(mangling_analysis)
+    # really need to move the checking for whether restored IDs are in release (and getting PT etc)
+    # until after have done the initial mangling analysis so that can batch the data
     return results
