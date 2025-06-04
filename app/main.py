@@ -5,7 +5,7 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from unmangling.check_many import do_checks, check_entered_data
+from unmangling.check_entered_data import check_entered_data
 
 import logging
 
@@ -35,9 +35,9 @@ class ListOfIds(BaseModel):
 class EnteredData(BaseModel):
     text: str
 
-@app.post("/check_many/")
-def check_many(sctids: ListOfIds):
-    return do_checks(sctids.ids)
+# @app.post("/check_many/")
+# def check_many(sctids: ListOfIds):
+#     return do_checks(sctids.ids)
 
 @app.get("/health")
 def health_check():
@@ -45,7 +45,6 @@ def health_check():
 
 @app.post("/receive_entered_data/")
 def receive_entered_data(entered_data: EnteredData):
-    logger.warning(f"DDDData received:{entered_data.text}:{datetime.datetime.now()}")
     return {"check_results":check_entered_data(text=entered_data.text)}
 
 if __name__ == '__main__':
