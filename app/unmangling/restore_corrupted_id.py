@@ -84,8 +84,11 @@ def detect_corruption_and_restore_id(sctid=None, ds=None, sct_version=None):
     # reconstruct as concept_id (RC) or description_id(RD)
     if n_digits==16:
         temp=sctid[:-1]
-        RC=temp + str(checkdigit.verhoeff_compute(temp))
-        RD=None
+        RC=RD=None
+        if temp[-1]=="0":
+            RC=temp + str(checkdigit.verhoeff_compute(temp))
+        elif temp[-1]=="1":
+            RD=temp + str(checkdigit.verhoeff_compute(temp))
     elif n_digits==17 or (n_digits==18 and sctid[:6]=="900000"): # 17 digit or 18 digit "short form" that all seem to start 900000
         temp=sctid[:-2]
         RC=temp + "0" + str(checkdigit.verhoeff_compute(temp+"0"))
@@ -103,7 +106,8 @@ def detect_corruption_and_restore_id(sctid=None, ds=None, sct_version=None):
     # RC_in_release=check_if_in_release(sctid=RC, sct_version=sct_version, ds=ds)
     RD_in_release=(RD is not None) and check_if_in_release(sctid=RD, sct_version=sct_version, ds=ds)
 
-    mangling_analysis["mangling_suspected"]=True
+    mangling_analysis["mangling_suspected"]=True # this still may not be True if RC and RD both are None
+                                                 # or neither is in release                                           
     mangling_analysis["reconstructed_concept_ID"]=RC    
     mangling_analysis["reconstructed_description_ID"]=RD    
     mangling_analysis["RC_in_release"]=RC_in_release    
