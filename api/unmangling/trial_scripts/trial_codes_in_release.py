@@ -1,12 +1,12 @@
 import sys
-from . import codes_in_release
+from .. import codes_in_release
 
 import logging
 
 logger = logging.getLogger()
 
-from ..terminology_server.terminology_server_module import TerminologyServer
-from .mytimer import MyTimer
+from ...terminology_server.terminology_server_module import TerminologyServer
+from ..mytimer import MyTimer
 
 ts = TerminologyServer()
 # concept_id=sys.argv[1]
@@ -21,7 +21,7 @@ ts = TerminologyServer()
 # else:
 #     print(f" {concept_id} is not in lateset release")
 
-concept_id_list = ["91487003999", "91487003"] * 20
+concept_id_list = ["91487003999", "91487003"] * 2000
 results_dict = codes_in_release.check_list_of_concept_ids_in_release_and_get_display(
     concept_id_list=concept_id_list,
     terminology_server=ts,

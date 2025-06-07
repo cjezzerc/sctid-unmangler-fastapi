@@ -1,6 +1,6 @@
 import sys
-from unmangling import codes_in_release
-from terminology_server.terminology_server_module import TerminologyServer
+from .. import codes_in_release
+from ...terminology_server.terminology_server_module import TerminologyServer
 
 ts = TerminologyServer()
 

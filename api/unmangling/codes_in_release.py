@@ -18,7 +18,6 @@ def check_status_code(response):
         return None
     return response
 
-
 def check_concept_id_in_release_and_get_display(
     concept_id=None, terminology_server=None
 ):

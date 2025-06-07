@@ -5,7 +5,7 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from unmangling.check_entered_data import check_entered_data
+from .unmangling.check_entered_data import check_entered_data
 
 import logging
 
