@@ -1,6 +1,8 @@
 import sys
 from .. import codes_in_release
 
+import pprint
+
 import logging
 
 logger = logging.getLogger()
@@ -21,10 +23,29 @@ ts = TerminologyServer()
 # else:
 #     print(f" {concept_id} is not in lateset release")
 
-concept_id_list = ["91487003999", "91487003"] * 2000
-results_dict = codes_in_release.check_list_of_concept_ids_in_release_and_get_display(
-    concept_id_list=concept_id_list,
-    terminology_server=ts,
+# concept_id_list = ["91487003999", "91487003"] * 2000
+# results_dict = codes_in_release.check_list_of_concept_ids_in_release_and_get_display(
+#     concept_id_list=concept_id_list,
+#     terminology_server=ts,
+# )
+# print(results_dict)
+
+# description_id='509466017'
+# response = (
+#     codes_in_release.check_description_id_in_release_and_get_concept_id_and_display(
+#         description_id=description_id,
+#         terminology_server=ts,
+#     )
+# )
+# pprint.pprint(response, indent=2)
+
+results_dict = (
+    codes_in_release.check_list_of_description_ids_in_release_and_get_concept_id_and_display(
+        description_id_list=['509466017','509466017999'],
+        terminology_server=ts,
+    )
 )
 
 print(results_dict)
+# pprint.pprint(response.json(), indent=2)
+
