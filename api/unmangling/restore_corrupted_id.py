@@ -1,10 +1,13 @@
-import re
+import re, json
 from enum import Enum
 
 from . import checkdigit
 
 from ..terminology_server.terminology_server_module import TerminologyServer
-from .codes_in_release import check_concept_id_in_release_and_get_display
+from .codes_in_release import (
+    check_concept_id_in_release_and_get_display,
+    check_list_of_concept_ids_in_release_and_get_display,
+)
 
 
 def check_if_in_release(sctid=None, ds=None, sct_version=None):
@@ -149,6 +152,16 @@ class CorruptionAnalysis:
     def __repr__(self):
         return "\n".join([f" {x}:{getattr(self, x)}" for x in self.__slots__])
 
+    def to_json(self):
+        temp_dict = {}
+        for x in self.__slots__:
+            if isinstance(getattr(self, x), OutcomeCodes):
+                temp_dict[x] = str(getattr(self, x))
+            else:
+                temp_dict[x] = getattr(self, x)
+
+        return json.dumps(temp_dict)
+
 
 class OutcomeCodes(Enum):
     CANNOT_BE_CORRUPTED = (
@@ -272,5 +285,21 @@ def new_detect_corruption_and_restore_id_no_release_checking(
         corruption_analysis.r_cid = None
 
     corruption_analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION
-    
+
     return corruption_analysis
+
+
+def check_corruption_analyses_for_codes_in_release(
+    analyses_list=None,
+    terminology_server=None,
+):
+
+    cid_list = [a.r_cid for a in analyses_list if a.r_cid != None]
+    did_list = [a.r_did for a in analyses_list if a.r_did != None]
+
+    results_dict = check_list_of_concept_ids_in_release_and_get_display(
+        concept_id_list=cid_list,
+        terminology_server=terminology_server,
+    )
+
+    return results_dict
