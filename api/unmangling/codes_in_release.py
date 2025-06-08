@@ -141,7 +141,7 @@ def check_list_of_description_ids_in_release_and_get_concept_id_and_display(
         results_dict = {}
         for entry in response.json()["entry"]:
 
-            # only way to extract back the description id seems to be from 
+            # only way to extract back the description id seems to be from
             # an re search on the url that is returned in each bundle entry in the response
             url = entry["resource"]["url"]
             description_id = re.search(r'"(.*)"', url).groups()[0]
@@ -155,6 +155,7 @@ def check_list_of_description_ids_in_release_and_get_concept_id_and_display(
                 in_release = False
                 corresponding_concept_id = None
                 preferred_term = None
+
             results_dict[description_id] = (
                 in_release,
                 corresponding_concept_id,
