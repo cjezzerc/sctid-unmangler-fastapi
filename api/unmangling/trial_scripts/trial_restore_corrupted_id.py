@@ -1,3 +1,5 @@
+import pprint
+
 from .. import restore_corrupted_id
 from ...terminology_server.terminology_server_module import TerminologyServer
 
@@ -32,9 +34,12 @@ for sctid in [
     print("===================")
 
 ts = TerminologyServer()
-results_dict = restore_corrupted_id.check_corruption_analyses_for_codes_in_release(
-    analyses_list=analyses_list,
-    terminology_server=ts,
+results_dict_cid, results_dict_did = (
+    restore_corrupted_id.check_corruption_analyses_for_codes_in_release(
+        analyses_list=analyses_list,
+        terminology_server=ts,
+    )
 )
 
-print(results_dict)
+pprint.pprint(results_dict_cid, indent=2)
+pprint.pprint(results_dict_did, indent=2)
