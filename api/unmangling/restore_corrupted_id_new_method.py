@@ -16,18 +16,18 @@ class CorruptionAnalysis:
         "r_cid",
         "r_did",
         "r_cid_pt",
+        "r_did_term",
         "r_did_corresp_cid",
-        "r_did_corresp_cid_pt",
     ]
 
     def __init__(self, sctid=None):
         self.sctid_provided = sctid
         self.outcome_code = None
         self.r_cid = None
-        self.r_cid_pt = None
         self.r_did = None
+        self.r_cid_pt = None
+        self.r_did_term = None
         self.r_did_corresp_cid = None
-        self.r_did_corresp_cid_pt = None
 
     def __repr__(self):
         return "\n".join([f" {x}:{getattr(self, x)}" for x in self.__slots__])
@@ -62,6 +62,7 @@ def new_detect_corruption_and_restore_id_no_release_checking(
     sctid = str(sctid)  # in case test with an int
 
     corruption_analysis = CorruptionAnalysis()
+    corruption_analysis.sctid_provided=sctid
 
     # can't be excel corruption if not purely digits
     if (
@@ -184,4 +185,24 @@ def check_corruption_analyses_for_codes_in_release(
         description_id_list=did_list,
     )
 
+    for analysis in analyses_list:
+        # print(f"\n\n====before===\n{analysis}\n=============")
+        
+        if analysis.r_cid is not None: 
+            in_release, pt=results_dict_cid[analysis.r_cid]
+            if in_release: 
+                analysis.r_cid_pt=pt
+            else:          
+                analysis.r_cid=None
+        
+        if analysis.r_did is not None: 
+            in_release, term, corresp_cid=results_dict_did[analysis.r_did]
+            if in_release: 
+                analysis.r_did_corresp_cid=corresp_cid
+                analysis.r_did_term=term
+            else:          
+                analysis.r_did=None
+
+        # print(f"====before===\n{analysis}\n=============\n\n")
+    
     return results_dict_cid, results_dict_did
