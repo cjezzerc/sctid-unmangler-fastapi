@@ -5,7 +5,7 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from .unmangling.check_entered_data import check_entered_data
+from .unmangling.check_entered_data import check_entered_data, check_entered_data_new
 
 import logging
 
@@ -53,6 +53,10 @@ def health_check():
 @app.post("/receive_entered_data/")
 def receive_entered_data(entered_data: EnteredData):
     return {"check_results": check_entered_data(text=entered_data.text)}
+
+@app.post("/receive_entered_data_new/")
+def receive_entered_data(entered_data: EnteredData):
+    return {"check_results": check_entered_data_new(text=entered_data.text)}
 
 
 if __name__ == "__main__":

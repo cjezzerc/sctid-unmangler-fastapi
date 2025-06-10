@@ -1,6 +1,11 @@
 import re
+import json
 
 from .restore_corrupted_id import detect_corruption_and_restore_id
+from .restore_corrupted_id_new_method import (
+    new_detect_corruption_and_restore_id_no_release_checking,
+    check_corruption_analyses_for_codes_in_release,
+)
 from .parse_and_validate_sctid import ParsedSCTID
 
 # def do_checks(id_list):
@@ -39,3 +44,30 @@ def check_entered_data(text=None):
     # really need to move the checking for whether restored IDs are in release (and getting PT etc)
     # until after have done the initial mangling analysis so that can batch the data
     return results
+
+
+def check_entered_data_new(text=None):
+    other_data = []
+    analyses_list = []
+    for i_line, line in enumerate(text.split("\n")):
+        sctid, rest_of_line = parse_line(line)
+
+        corruption_analysis = new_detect_corruption_and_restore_id_no_release_checking(
+            sctid=sctid
+        )
+        analyses_list.append(corruption_analysis)
+        other_data.append({"rest_of_line": rest_of_line, "react_key": i_line})
+
+    analyses_list = check_corruption_analyses_for_codes_in_release(
+        analyses_list=analyses_list,
+    )
+    results = []
+    for i_line, other_data in enumerate(other_data):
+        results.append(
+            {
+                "other_data": other_data,
+                "corruption_analysis": analyses_list[i_line].to_dict(),
+            }
+        )
+    return results
+

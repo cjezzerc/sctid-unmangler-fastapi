@@ -8,10 +8,13 @@ from .codes_in_release import (
     check_list_of_concept_ids_in_release_and_get_display_sqllite,
     check_list_of_description_ids_in_release_and_get_concept_id_and_display_sqllite,
 )
+from .parse_and_validate_sctid import ParsedSCTID
+
 
 class CorruptionAnalysis:
     __slots__ = [
         "sctid_provided",
+        "validity",
         "outcome_code",
         "r_cid",
         "r_did",
@@ -22,6 +25,7 @@ class CorruptionAnalysis:
 
     def __init__(self, sctid=None):
         self.sctid_provided = sctid
+        self.validity = None
         self.outcome_code = None
         self.r_cid = None
         self.r_did = None
@@ -30,17 +34,18 @@ class CorruptionAnalysis:
         self.r_did_corresp_cid = None
 
     def __repr__(self):
-        return "\n".join([f" {x}:{getattr(self, x)}" for x in self.__slots__])
+        # return "\n".join([f" {x}:{getattr(self, x)}" for x in self.__slots__])
+        return self.to_json()
 
-    def to_json(self):
+    def to_dict(self):
         temp_dict = {}
         for x in self.__slots__:
             if isinstance(getattr(self, x), OutcomeCodes):
                 temp_dict[x] = str(getattr(self, x))
             else:
                 temp_dict[x] = getattr(self, x)
-
-        return json.dumps(temp_dict)
+        return temp_dict
+        # return json.dumps(temp_dict)
 
 
 class OutcomeCodes(Enum):
@@ -62,7 +67,11 @@ def new_detect_corruption_and_restore_id_no_release_checking(
     sctid = str(sctid)  # in case test with an int
 
     corruption_analysis = CorruptionAnalysis()
-    corruption_analysis.sctid_provided=sctid
+    corruption_analysis.sctid_provided = sctid
+    corruption_analysis.validity = ParsedSCTID(
+        string=sctid
+    ).valid  # don't actually use this in this function
+    # - it is for reporting in the front end
 
     # can't be excel corruption if not purely digits
     if (
@@ -181,28 +190,31 @@ def check_corruption_analyses_for_codes_in_release(
         concept_id_list=cid_list,
     )
 
-    results_dict_did = check_list_of_description_ids_in_release_and_get_concept_id_and_display_sqllite(
-        description_id_list=did_list,
+    results_dict_did = (
+        check_list_of_description_ids_in_release_and_get_concept_id_and_display_sqllite(
+            description_id_list=did_list,
+        )
     )
 
     for analysis in analyses_list:
         # print(f"\n\n====before===\n{analysis}\n=============")
-        
-        if analysis.r_cid is not None: 
-            in_release, pt=results_dict_cid[analysis.r_cid]
-            if in_release: 
-                analysis.r_cid_pt=pt
-            else:          
-                analysis.r_cid=None
-        
-        if analysis.r_did is not None: 
-            in_release, term, corresp_cid=results_dict_did[analysis.r_did]
-            if in_release: 
-                analysis.r_did_corresp_cid=corresp_cid
-                analysis.r_did_term=term
-            else:          
-                analysis.r_did=None
+
+        if analysis.r_cid is not None:
+            in_release, pt = results_dict_cid[analysis.r_cid]
+            if in_release:
+                analysis.r_cid_pt = pt
+            else:
+                analysis.r_cid = None
+
+        if analysis.r_did is not None:
+            in_release, term, corresp_cid = results_dict_did[analysis.r_did]
+            if in_release:
+                analysis.r_did_corresp_cid = corresp_cid
+                analysis.r_did_term = term
+            else:
+                analysis.r_did = None
 
         # print(f"====before===\n{analysis}\n=============\n\n")
-    
-    return results_dict_cid, results_dict_did
+
+    # return results_dict_cid, results_dict_did
+    return analyses_list
