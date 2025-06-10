@@ -1,5 +1,3 @@
-import pprint, json
-
 from .. import check_entered_data
 
 text = """
@@ -20,12 +18,6 @@ text = """
     10093501000001100  # ambiguous - 10093501000001107 and 10093501000001111 both exist
     999001741000000000  # ambiguous - 999001741000000107 and 999001741000000111 both exist"""
 
-results = check_entered_data.check_entered_data_new(text=text)
+results = check_entered_data.check_entered_data(text=text)
 
 print(results)
-
-pprint.pprint(results, indent=2)
-
-# pprint.pprint(results, indent=2)
-
-

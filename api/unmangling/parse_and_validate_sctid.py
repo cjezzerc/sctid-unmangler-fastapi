@@ -1,4 +1,4 @@
-"""Utilities (independent of FHIR or Terminology Server) for dealing with SNOMED CT items"""
+"""class to parse a SCTID and check its validity"""
 
 import re
 

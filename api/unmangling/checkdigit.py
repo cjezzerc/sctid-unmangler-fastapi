@@ -1,3 +1,7 @@
+"""
+Functions for calculating and checking the check digit for an sctid
+"""
+
 # Code is conversion of code from:
 #     https://github.com/IHTSDO/component-identifier-service-legacy/blob/master/utils/SctIdHelper.js)
 

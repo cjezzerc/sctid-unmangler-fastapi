@@ -1,21 +1,25 @@
 """
-functions related to testing if a code is a SNOMED release
+Functions related to testing if lists of codes are in SNOMED release
 and if so retrieving the preferred term, associated concept id (for descriptions) etc
+
+Uses a simple sqllite database for speed
 """
 
 import os
 import sqlite3
-import urllib.parse
-import re
 
 import logging
-from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 
 logger = logging.getLogger()
 
-def check_list_of_concept_ids_in_release_and_get_display_sqllite(
+def check_list_of_concept_ids_in_release_and_get_display(
     concept_id_list=None,
 ):
+    """
+    Takes a list of concept ids, and checks for each one if it is in the release
+    and if so also retrieves the preferred term
+    """
+
     descriptions_sqllite_file = os.environ["DESCRIPTIONS_SQLLITE_FILE"]
     with sqlite3.connect(descriptions_sqllite_file) as conn:
         cursor = conn.cursor()
@@ -36,9 +40,13 @@ def check_list_of_concept_ids_in_release_and_get_display_sqllite(
                 results_dict[concept_id] = (False, None)
         return results_dict
 
-def check_list_of_description_ids_in_release_and_get_concept_id_and_display_sqllite(
+def check_list_of_description_ids_in_release_and_get_concept_id_and_display(
     description_id_list=None,
 ):
+    """
+    Takes a list of description ids, and checks for each one if it is in the release
+    and if so also retrieves the term and the corresponding concept id
+    """
     descriptions_sqllite_file = os.environ["DESCRIPTIONS_SQLLITE_FILE"]
     with sqlite3.connect(descriptions_sqllite_file) as conn:
         cursor = conn.cursor()

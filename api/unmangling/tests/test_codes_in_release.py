@@ -1,45 +1,24 @@
-import sys
 from .. import codes_in_release
-from ...terminology_server.terminology_server_module import TerminologyServer
-
-ts = TerminologyServer()
 
 
-def test_1():
-    in_release, preferred_term = (
-        codes_in_release.check_concept_id_in_release_and_get_display(
-            concept_id=91487003999,
-            terminology_server=ts,
+def test_concepts():
+    results_dict = (
+        codes_in_release.check_list_of_concept_ids_in_release_and_get_display(
+            concept_id_list=["86290005", "86290005999"],
         )
     )
-    assert in_release is False
-    assert preferred_term is None
+    assert results_dict == {
+        "86290005": (True, "Respiratory rate"),
+        "86290005999": (False, None),
+    }
 
 
-def test_2():
-    in_release, preferred_term = (
-        codes_in_release.check_concept_id_in_release_and_get_display(
-            concept_id=91487003,
-            terminology_server=ts,
-        )
+def test_descriptions():
+
+    results_dict = codes_in_release.check_list_of_description_ids_in_release_and_get_concept_id_and_display(
+        description_id_list=["509466017", "509466017999"],
     )
-    assert in_release is True
-    assert preferred_term == "Nappy rash"
-
-def test_3():
-    in_release, corresponding_concept_id, preferred_term = codes_in_release.check_description_id_in_release_and_get_concept_id_and_display(
-            description_id=509466017,
-            terminology_server=ts,
-        )
-    assert in_release is True
-    assert corresponding_concept_id == "91487003"
-    assert preferred_term == "Nappy rash"
-
-def test_4():
-    in_release, corresponding_concept_id, preferred_term = codes_in_release.check_description_id_in_release_and_get_concept_id_and_display(
-            description_id=509466017999,
-            terminology_server=ts,
-        )
-    assert in_release is False
-    assert corresponding_concept_id is None
-    assert preferred_term is None
+    assert results_dict == {
+        "509466017": (True, "Ammoniacal napkin dermatitis", "91487003"),
+        "509466017999": (False, None, None),
+    }

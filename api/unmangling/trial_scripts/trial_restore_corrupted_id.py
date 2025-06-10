@@ -1,6 +1,6 @@
 import pprint
 
-from .. import restore_corrupted_id_new_method
+from .. import restore_corrupted_id
 from ...terminology_server.terminology_server_module import TerminologyServer
 
 ts = TerminologyServer()
@@ -26,27 +26,11 @@ for sctid in [
     "999001741000000000",  # ambiguous - 999001741000000107 and 999001741000000111 both exist
 ]:
     print(sctid)
-    results = restore_corrupted_id_new_method.new_detect_corruption_and_restore_id_no_release_checking(
+    results = restore_corrupted_id.analyse_sctid_for_corruption(
         sctid=sctid
     )
-    print(results)
-    print(results.to_json())
     analyses_list.append(results)
-    print("===================")
 
-# results_dict_cid, results_dict_did = (
-#     restore_corrupted_id_new_method.check_corruption_analyses_for_codes_in_release(
-#         analyses_list=analyses_list,
-#     )
-# )
-
-# pprint.pprint(results_dict_cid, indent=2)
-# pprint.pprint(results_dict_did, indent=2)
-
-analyses_list = (
-    restore_corrupted_id_new_method.check_corruption_analyses_for_codes_in_release(
-        analyses_list=analyses_list,
-    )
-)
-
+print(analyses_list)
+print()
 pprint.pprint(analyses_list)
