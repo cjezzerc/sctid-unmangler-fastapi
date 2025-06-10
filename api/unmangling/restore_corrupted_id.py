@@ -4,6 +4,7 @@ Functions and classes for detecting corruption of sctids and possible reconsruct
 
 import re, json
 from enum import Enum
+import logging
 
 from . import checkdigit
 
@@ -14,6 +15,7 @@ from .codes_in_release import (
 )
 from .parse_and_validate_sctid import ParsedSCTID
 
+logger=logging.getLogger()
 
 class CorruptionAnalysis:
     """A class to contain the results of analysis for corruption"""
@@ -57,15 +59,16 @@ class CorruptionAnalysis:
 class OutcomeCodes(Enum):
     """An ENUM to contain the valid outcome_codes"""
 
-    CANNOT_BE_CORRUPTED = (
-        "The code is not 16-18 digits (or does not contain pure digits)"
+    NOT_16_TO_18_DIGITS = "The code is not 16-18 digits"
+    NOT_PURE_DIGITS = "The code does not contain pure digits"
+    NOT_TRAILING_ZEROES = "The code is long enough to be corrupted but does not have the correct pattern of trailing zeroes"
+    ANY_CORRUPTION_IS_SILENT_16 = (
+        "This is a 16 digit code with a correct check digit of 0"
     )
-    NOT_CORRUPTED = "The code is long enough to be corrupted but does not have the correct pattern of trailing zeroes"
-    ANY_CORRUPTION_IS_SILENT = (
-        "This is a 16 digit ccode with a correct check digit of 0"
-    )
-    NOT_RECONSTRUCTABLE = "The code has 16 digits but digit 15 is neither 0 nor 1"
+    NOT_RECONSTRUCTABLE_16="The code has 16 digits but digit 15 is neither 0 nor 1"
     POSSIBLE_CORRUPTION = "???"
+    ANY_CORRUPTION_MAY_BE_SILENT_17_18="The reconstructed cid is the same as the sctid entered but whether r_did in release not checked yetq" \
+    ""
 
 
 def analyse_sctid_for_corruption(
@@ -86,12 +89,13 @@ def analyse_sctid_for_corruption(
     # - it is for reporting in the front end
 
     # can't be excel corruption if not purely digits
-    if (
-        ((re.search(r"^[0-9]+$", sctid.strip())) is None)
-        or (len(sctid) < 16)
-        or (len(sctid) > 18)
-    ):
-        corruption_analysis.outcome_code = OutcomeCodes.CANNOT_BE_CORRUPTED
+    if (re.search(r"^[0-9]+$", sctid.strip())) is None:
+        corruption_analysis.outcome_code = OutcomeCodes.NOT_PURE_DIGITS
+        return corruption_analysis
+
+    # can't be excel corruption if not purely digits
+    if len(sctid) not in [16, 17, 18]:
+        corruption_analysis.outcome_code = OutcomeCodes.NOT_16_TO_18_DIGITS
         return corruption_analysis
 
     n_digits = len(sctid)
@@ -103,7 +107,7 @@ def analyse_sctid_for_corruption(
                     match checkdigit.verhoeff_check(sctid):
                         case True:
                             corruption_analysis.outcome_code = (
-                                OutcomeCodes.ANY_CORRUPTION_IS_SILENT
+                                OutcomeCodes.ANY_CORRUPTION_IS_SILENT_16
                             )
                             return corruption_analysis
                         case False:
@@ -120,11 +124,11 @@ def analyse_sctid_for_corruption(
                                     )
                                 case _:
                                     corruption_analysis.outcome_code = (
-                                        OutcomeCodes.NOT_RECONSTRUCTABLE
+                                        OutcomeCodes.NOT_RECONSTRUCTABLE_16
                                     )
                                     return corruption_analysis
                 case _:
-                    corruption_analysis.outcome_code = OutcomeCodes.NOT_CORRUPTED
+                    corruption_analysis.outcome_code = OutcomeCodes.NOT_TRAILING_ZEROES
                     return corruption_analysis
 
         case 17:
@@ -138,7 +142,7 @@ def analyse_sctid_for_corruption(
                         stem + "1" + str(checkdigit.verhoeff_compute(stem + "1"))
                     )
                 case _:
-                    corruption_analysis.outcome_code = OutcomeCodes.NOT_CORRUPTED
+                    corruption_analysis.outcome_code = OutcomeCodes.NOT_TRAILING_ZEROES
                     return corruption_analysis
         case 18:
             match sctid[-3:]:
@@ -169,7 +173,7 @@ def analyse_sctid_for_corruption(
                                 + str(checkdigit.verhoeff_compute(stem + "11"))
                             )
                 case _:
-                    corruption_analysis.outcome_code = OutcomeCodes.NOT_CORRUPTED
+                    corruption_analysis.outcome_code = OutcomeCodes.NOT_TRAILING_ZEROES
                     return corruption_analysis
 
     # Now remove r_cid if it is the same as sctid
@@ -181,10 +185,12 @@ def analyse_sctid_for_corruption(
     # the case of 17 or 18 digits where the corruption of a DID might be missed if assumed that a valid
     # code ending in 00 (17 digits) or 000 (18 digits) were not corrupted.
     # But it means that r_cid may in fact be identical to sctid hence the next check and removal.
-    if n_digits in [17, 18] and corruption_analysis.r_cid == sctid:
-        corruption_analysis.r_cid = None
 
-    corruption_analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION
+    if n_digits in [17, 18] and corruption_analysis.r_cid == sctid:
+        # corruption_analysis.r_cid = None
+        corruption_analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_MAY_BE_SILENT_17_18
+    else:
+        corruption_analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION
 
     return corruption_analysis
 
