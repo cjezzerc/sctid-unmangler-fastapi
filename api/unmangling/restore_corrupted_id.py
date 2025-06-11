@@ -15,7 +15,8 @@ from .codes_in_release import (
 )
 from .parse_and_validate_sctid import ParsedSCTID
 
-logger=logging.getLogger()
+logger = logging.getLogger()
+
 
 class CorruptionAnalysis:
     """A class to contain the results of analysis for corruption"""
@@ -59,17 +60,18 @@ class CorruptionAnalysis:
 class OutcomeCodes(Enum):
     """An ENUM to contain the valid outcome_codes"""
 
-    NOT_16_TO_18_DIGITS = "The code is not 16-18 digits"
-    NOT_PURE_DIGITS = "The code does not contain pure digits"
-    NOT_TRAILING_ZEROES = "The code is long enough to be corrupted but does not have the correct pattern of trailing zeroes"
-    ANY_CORRUPTION_IS_SILENT_16 = (
-        "This is a 16 digit code with a correct check digit of 0"
-    )
-    NOT_RECONSTRUCTABLE_16="The code has 16 digits but digit 15 is neither 0 nor 1"
-    POSSIBLE_CORRUPTION = "???"
-    ANY_CORRUPTION_MAY_BE_SILENT_17_18="The reconstructed cid is the same as the sctid entered but whether r_did in release not checked yetq" \
-    ""
-
+    # fmt: off
+    POSSIBLE_CORRUPTION_UNAMBIG      = "1:???"
+    POSSIBLE_CORRUPTION_AMBIG        = "2:???"
+    POSSIBLE_CORRUPTION              = "3:???"
+    ANY_CORRUPTION_IS_SILENT         = "4:The corrupted form is the same as the original, is in release, and there is no alternative reconstruction"
+    SILENT_CORRUPTION_COULD_BE_AMBIG = "5:???"
+    NOT_PURE_DIGITS                  = "5:The code does not contain pure digits"
+    NOT_16_TO_18_DIGITS              = "6:The code is not 16-18 digits"
+    NOT_TRAILING_ZEROES              = "7:The code is long enough to be corrupted but does not have the correct pattern of trailing zeroes"
+    NOT_RECONSTRUCTABLE              = "9:The code has 16 digits but digit 15 is neither 0 nor 1"
+    NO_RECONSTRUCTIONS_EXIST          = "10:Neither the original nor any reconstruction is in release"
+    # fmt: on
 
 def analyse_sctid_for_corruption(
     sctid=None,
@@ -104,29 +106,29 @@ def analyse_sctid_for_corruption(
         case 16:
             match sctid[-1]:
                 case "0":
-                    match checkdigit.verhoeff_check(sctid):
-                        case True:
+                    # match checkdigit.verhoeff_check(sctid):
+                    #     case True:
+                    #         corruption_analysis.outcome_code = (
+                    #             OutcomeCodes.ANY_CORRUPTION_IS_SILENT_16_CHANGE
+                    #         )
+                    #         return corruption_analysis
+                    #     case False:
+                    match sctid[-2]:
+                        case "0":
+                            stem = sctid[:-1]
+                            corruption_analysis.r_cid = stem + str(
+                                checkdigit.verhoeff_compute(stem)
+                            )
+                        case "1":
+                            stem = sctid[:-1]
+                            corruption_analysis.r_did = stem + str(
+                                checkdigit.verhoeff_compute(stem)
+                            )
+                        case _:
                             corruption_analysis.outcome_code = (
-                                OutcomeCodes.ANY_CORRUPTION_IS_SILENT_16
+                                OutcomeCodes.NOT_RECONSTRUCTABLE
                             )
                             return corruption_analysis
-                        case False:
-                            match sctid[-2]:
-                                case "0":
-                                    stem = sctid[:-1]
-                                    corruption_analysis.r_cid = stem + str(
-                                        checkdigit.verhoeff_compute(stem)
-                                    )
-                                case "1":
-                                    stem = sctid[:-1]
-                                    corruption_analysis.r_did = stem + str(
-                                        checkdigit.verhoeff_compute(stem)
-                                    )
-                                case _:
-                                    corruption_analysis.outcome_code = (
-                                        OutcomeCodes.NOT_RECONSTRUCTABLE_16
-                                    )
-                                    return corruption_analysis
                 case _:
                     corruption_analysis.outcome_code = OutcomeCodes.NOT_TRAILING_ZEROES
                     return corruption_analysis
@@ -186,17 +188,17 @@ def analyse_sctid_for_corruption(
     # code ending in 00 (17 digits) or 000 (18 digits) were not corrupted.
     # But it means that r_cid may in fact be identical to sctid hence the next check and removal.
 
-    if n_digits in [17, 18] and corruption_analysis.r_cid == sctid:
-        # corruption_analysis.r_cid = None
-        corruption_analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_MAY_BE_SILENT_17_18
-    else:
-        corruption_analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION
+    # if n_digits in [17, 18] and corruption_analysis.r_cid == sctid:
+    #     # corruption_analysis.r_cid = None
+    #     corruption_analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_MAY_BE_SILENT_17_18
+    # else:
+    corruption_analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION
 
     return corruption_analysis
 
 
 def check_corruption_analyses_for_codes_in_release(
-    analyses_list=None,
+    analyses_list: list[CorruptionAnalysis] = None,
 ):
     """
     Takes a list of CorruptionAnalysis objects and uses sqllite release db to check if cid and/or did exist
@@ -218,20 +220,44 @@ def check_corruption_analyses_for_codes_in_release(
     )
 
     for analysis in analyses_list:
+        if analysis.outcome_code == OutcomeCodes.POSSIBLE_CORRUPTION:
+            temp_r_cid = analysis.r_cid
 
-        if analysis.r_cid is not None:
-            in_release, pt = results_dict_cid[analysis.r_cid]
-            if in_release:
-                analysis.r_cid_pt = pt
-            else:
-                analysis.r_cid = None
+            if analysis.r_cid is not None:
+                in_release, pt = results_dict_cid[analysis.r_cid]
+                if in_release:
+                    analysis.r_cid_pt = pt
+                else:
+                    analysis.r_cid = None
 
-        if analysis.r_did is not None:
-            in_release, term, corresp_cid = results_dict_did[analysis.r_did]
-            if in_release:
-                analysis.r_did_corresp_cid = corresp_cid
-                analysis.r_did_term = term
-            else:
-                analysis.r_did = None
+            if analysis.r_did is not None:
+                in_release, term, corresp_cid = results_dict_did[analysis.r_did]
+                if in_release:
+                    analysis.r_did_corresp_cid = corresp_cid
+                    analysis.r_did_term = term
+                else:
+                    analysis.r_did = None
+
+            # amend outcome codes if necessary
+            if (analysis.r_cid is not None) ^ (analysis.r_did is not None):
+                analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION_UNAMBIG
+            if (analysis.r_cid is not None) and (analysis.r_did is not None):
+                analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION_AMBIG
+            if (analysis.r_cid is None) and (analysis.r_did is None):
+                analysis.outcome_code = OutcomeCodes.NO_RECONSTRUCTIONS_EXIST
+            if (
+                (analysis.r_cid is not None)
+                and (analysis.r_did is None)
+                and (temp_r_cid == analysis.sctid_provided)
+            ):
+                analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_IS_SILENT
+            if (
+                (analysis.r_cid is not None)
+                and (analysis.r_did is not None)
+                and (temp_r_cid == analysis.sctid_provided)
+            ):
+                analysis.outcome_code = OutcomeCodes.SILENT_CORRUPTION_COULD_BE_AMBIG
+                analysis.r_cid = None # f"((({analysis.r_cid})))" 
+                analysis.r_cid_pt = None # f"((({analysis.r_cid_pt})))" 
 
     return analyses_list
