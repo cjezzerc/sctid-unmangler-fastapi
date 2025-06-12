@@ -65,7 +65,7 @@ class OutcomeCodes(Enum):
     POSSIBLE_CORRUPTION_AMBIG        = "2:???"
     POSSIBLE_CORRUPTION              = "3:???"
     ANY_CORRUPTION_IS_SILENT         = "4:The corrupted form is the same as the original, is in release, and there is no alternative reconstruction"
-    SILENT_CORRUPTION_COULD_BE_AMBIG = "5:???"
+    AMBIG_COULD_BE_SILENT = "5:???"
     NOT_PURE_DIGITS                  = "5:The code does not contain pure digits"
     NOT_16_TO_18_DIGITS              = "6:The code is not 16-18 digits"
     NOT_TRAILING_ZEROES              = "7:The code is long enough to be corrupted but does not have the correct pattern of trailing zeroes"
@@ -206,6 +206,11 @@ def check_corruption_analyses_for_codes_in_release(
     Also extracts extra data such as preferred term
     """
 
+    # temporarily get rid of did's
+    # for a in analyses_list:
+    #     a.r_did=None
+    #     a.r_did_term=None
+
     cid_list = [a.r_cid for a in analyses_list if a.r_cid != None]
     did_list = [a.r_did for a in analyses_list if a.r_did != None]
 
@@ -238,26 +243,32 @@ def check_corruption_analyses_for_codes_in_release(
                 else:
                     analysis.r_did = None
 
-            # amend outcome codes if necessary
+            # refine outcome code 
             if (analysis.r_cid is not None) ^ (analysis.r_did is not None):
                 analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION_UNAMBIG
+
             if (analysis.r_cid is not None) and (analysis.r_did is not None):
                 analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION_AMBIG
+
             if (analysis.r_cid is None) and (analysis.r_did is None):
                 analysis.outcome_code = OutcomeCodes.NO_RECONSTRUCTIONS_EXIST
+
             if (
                 (analysis.r_cid is not None)
                 and (analysis.r_did is None)
                 and (temp_r_cid == analysis.sctid_provided)
             ):
                 analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_IS_SILENT
+                analysis.r_cid =  f"(!) {analysis.r_cid}" 
+                analysis.r_cid_pt =  f"(!) {analysis.r_cid_pt}" 
+
             if (
                 (analysis.r_cid is not None)
                 and (analysis.r_did is not None)
                 and (temp_r_cid == analysis.sctid_provided)
             ):
-                analysis.outcome_code = OutcomeCodes.SILENT_CORRUPTION_COULD_BE_AMBIG
-                analysis.r_cid = None # f"((({analysis.r_cid})))" 
-                analysis.r_cid_pt = None # f"((({analysis.r_cid_pt})))" 
+                analysis.outcome_code = OutcomeCodes.AMBIG_COULD_BE_SILENT
+                analysis.r_cid =  f"(!) {analysis.r_cid}" 
+                analysis.r_cid_pt =  f"(!) {analysis.r_cid_pt}" 
 
     return analyses_list
