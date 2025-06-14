@@ -273,8 +273,8 @@ def check_corruption_analyses_for_codes_in_release(
                 and (temp_r_cid == analysis.sctid_provided)
             ):
                 analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_IS_SILENT
-                analysis.r_cid = f"(!) {analysis.r_cid}"
-                analysis.r_cid_pt = f"(!) {analysis.r_cid_pt}"
+                # analysis.r_cid = f"(!) {analysis.r_cid}"
+                # analysis.r_cid_pt = f"(!) {analysis.r_cid_pt}"
 
             if (
                 (analysis.r_cid is not None)
