@@ -36,8 +36,9 @@ class ListOfIds(BaseModel):
     ids: list
 
 
-class EnteredData(BaseModel):
-    text: str
+class ReceivedData(BaseModel):
+    entered_text: str
+    did_ignore_flag: bool = False
 
 
 @app.get("/health")
@@ -46,8 +47,13 @@ def health_check():
 
 
 @app.post("/receive_entered_data/")
-def receive_entered_data(entered_data: EnteredData):
-    return {"check_results": check_entered_data(text=entered_data.text)}
+def receive_entered_data(received_data: ReceivedData):
+    return {
+        "check_results": check_entered_data(
+            text=received_data.entered_text,
+            did_ignore_flag=received_data.did_ignore_flag,
+        )
+    }
 
 
 if __name__ == "__main__":

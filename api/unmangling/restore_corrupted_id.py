@@ -23,10 +23,16 @@ class CorruptionAnalysis:
 
     __slots__ = [
         "sctid_provided",
+        "sctid_provided_stem",
+        "sctid_provided_trailing_zeroes",
         "validity",
         "outcome_code",
         "r_cid",
+        "r_cid_stem",
+        "r_cid_trailing_zeroes",
         "r_did",
+        "r_did_stem",
+        "r_did_trailing_zeroes",
         "r_cid_pt",
         "r_did_term",
         "r_did_corresp_cid",
@@ -34,10 +40,16 @@ class CorruptionAnalysis:
 
     def __init__(self, sctid=None):
         self.sctid_provided = sctid
+        self.sctid_provided_stem = None
+        self.sctid_provided_trailing_zeroes = None
         self.validity = None
         self.outcome_code = None
         self.r_cid = None
+        self.r_cid_stem = None
+        self.r_cid_trailing_zeroes = None
         self.r_did = None
+        self.r_did_stem = None
+        self.r_did_trailing_zeroes = None
         self.r_cid_pt = None
         self.r_did_term = None
         self.r_did_corresp_cid = None
@@ -72,6 +84,7 @@ class OutcomeCodes(Enum):
     NOT_RECONSTRUCTABLE              = "9:The code has 16 digits but digit 15 is neither 0 nor 1"
     NO_RECONSTRUCTIONS_EXIST          = "10:Neither the original nor any reconstruction is in release"
     # fmt: on
+
 
 def analyse_sctid_for_corruption(
     sctid=None,
@@ -199,6 +212,7 @@ def analyse_sctid_for_corruption(
 
 def check_corruption_analyses_for_codes_in_release(
     analyses_list: list[CorruptionAnalysis] = None,
+    did_ignore_flag: bool = False,
 ):
     """
     Takes a list of CorruptionAnalysis objects and uses sqllite release db to check if cid and/or did exist
@@ -206,10 +220,10 @@ def check_corruption_analyses_for_codes_in_release(
     Also extracts extra data such as preferred term
     """
 
-    # temporarily get rid of did's
-    # for a in analyses_list:
-    #     a.r_did=None
-    #     a.r_did_term=None
+    if did_ignore_flag:
+        for a in analyses_list:
+            a.r_did = None
+            a.r_did_term = None
 
     cid_list = [a.r_cid for a in analyses_list if a.r_cid != None]
     did_list = [a.r_did for a in analyses_list if a.r_did != None]
@@ -243,7 +257,7 @@ def check_corruption_analyses_for_codes_in_release(
                 else:
                     analysis.r_did = None
 
-            # refine outcome code 
+            # refine outcome code
             if (analysis.r_cid is not None) ^ (analysis.r_did is not None):
                 analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION_UNAMBIG
 
@@ -259,8 +273,8 @@ def check_corruption_analyses_for_codes_in_release(
                 and (temp_r_cid == analysis.sctid_provided)
             ):
                 analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_IS_SILENT
-                analysis.r_cid =  f"(!) {analysis.r_cid}" 
-                analysis.r_cid_pt =  f"(!) {analysis.r_cid_pt}" 
+                analysis.r_cid = f"(!) {analysis.r_cid}"
+                analysis.r_cid_pt = f"(!) {analysis.r_cid_pt}"
 
             if (
                 (analysis.r_cid is not None)
@@ -268,7 +282,7 @@ def check_corruption_analyses_for_codes_in_release(
                 and (temp_r_cid == analysis.sctid_provided)
             ):
                 analysis.outcome_code = OutcomeCodes.AMBIG_COULD_BE_SILENT
-                analysis.r_cid =  f"(!) {analysis.r_cid}" 
-                analysis.r_cid_pt =  f"(!) {analysis.r_cid_pt}" 
+                analysis.r_cid = f"(!) {analysis.r_cid}"
+                analysis.r_cid_pt = f"(!) {analysis.r_cid_pt}"
 
     return analyses_list

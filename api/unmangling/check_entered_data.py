@@ -9,7 +9,7 @@ from .restore_corrupted_id import (
     analyse_sctid_for_corruption,
     check_corruption_analyses_for_codes_in_release,
 )
-
+from . import add_stem_and_trailing_digits
 
 def parse_line(line=None):
     f = re.split(r"[\|\s]", line.strip())
@@ -21,7 +21,10 @@ def parse_line(line=None):
     return sctid, rest_of_line
 
 
-def check_entered_data(text=None):
+def check_entered_data(
+    text: str = None,
+    did_ignore_flag: bool = True,
+):
     other_data = (
         []
     )  # these two lists will correspond element by element to each line of input
@@ -35,7 +38,12 @@ def check_entered_data(text=None):
 
     analyses_list = check_corruption_analyses_for_codes_in_release(
         analyses_list=analyses_list,
+        did_ignore_flag=did_ignore_flag,
     )
+
+    for analysis in analyses_list:
+        add_stem_and_trailing_digits.add_stem_and_trailing_digits(analysis=analysis)
+
     results = []  # this holds the corresponding elements from
     #               other_data and analyses_list
     for i_line, other_data in enumerate(other_data):
