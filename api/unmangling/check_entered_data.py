@@ -50,7 +50,8 @@ def check_entered_data(
         results.append(
             {
                 "other_data": other_data,
-                "corruption_analysis": analyses_list[i_line].to_dict(),
+                # "corruption_analysis": analyses_list[i_line].to_dict(),
+                "corruption_analysis": analyses_list[i_line].model_dump(),
             }
         )
     return results

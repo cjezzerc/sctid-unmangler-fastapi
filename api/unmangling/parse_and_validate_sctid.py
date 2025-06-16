@@ -228,5 +228,3 @@ class ParsedSCTID:
                 + str(self.check_digit)
             )
 
-        # print("Message:",validation_message)
-        # print("Component type:", component_type)

@@ -1,3 +1,8 @@
+"""
+functions to assist UI by providing extra substrings of the stem 
+and trailing zeroes of the provide sctid and of reconstructions
+"""
+
 from .restore_corrupted_id import CorruptionAnalysis
 
 

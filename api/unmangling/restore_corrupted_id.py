@@ -18,72 +18,118 @@ from .parse_and_validate_sctid import ParsedSCTID
 logger = logging.getLogger()
 
 
-class CorruptionAnalysis:
-    """A class to contain the results of analysis for corruption"""
+# class CorruptionAnalysis:
+#     """A class to contain the results of analysis for corruption"""
 
-    __slots__ = [
-        "sctid_provided",
-        "sctid_provided_stem",
-        "sctid_provided_trailing_zeroes",
-        "validity",
-        "outcome_code",
-        "r_cid",
-        "r_cid_stem",
-        "r_cid_trailing_zeroes",
-        "r_did",
-        "r_did_stem",
-        "r_did_trailing_zeroes",
-        "r_cid_pt",
-        "r_did_term",
-        "r_did_corresp_cid",
-    ]
+#     __slots__ = [
+#         "sctid_provided",
+#         "sctid_provided_stem",
+#         "sctid_provided_trailing_zeroes",
+#         "validity",
+#         "outcome_code",
+#         "r_cid",
+#         "r_cid_stem",
+#         "r_cid_trailing_zeroes",
+#         "r_did",
+#         "r_did_stem",
+#         "r_did_trailing_zeroes",
+#         "r_cid_pt",
+#         "r_did_term",
+#         "r_did_corresp_cid",
+#     ]
 
-    def __init__(self, sctid=None):
-        self.sctid_provided = sctid
-        self.sctid_provided_stem = None
-        self.sctid_provided_trailing_zeroes = None
-        self.validity = None
-        self.outcome_code = None
-        self.r_cid = None
-        self.r_cid_stem = None
-        self.r_cid_trailing_zeroes = None
-        self.r_did = None
-        self.r_did_stem = None
-        self.r_did_trailing_zeroes = None
-        self.r_cid_pt = None
-        self.r_did_term = None
-        self.r_did_corresp_cid = None
+#     def __init__(self, sctid=None):
+#         self.sctid_provided = sctid
+#         self.sctid_provided_stem = None
+#         self.sctid_provided_trailing_zeroes = None
+#         self.validity = None
+#         self.outcome_code = None
+#         self.r_cid = None
+#         self.r_cid_stem = None
+#         self.r_cid_trailing_zeroes = None
+#         self.r_did = None
+#         self.r_did_stem = None
+#         self.r_did_trailing_zeroes = None
+#         self.r_cid_pt = None
+#         self.r_did_term = None
+#         self.r_did_corresp_cid = None
 
-    def __repr__(self):
-        # return "\n".join([f" {x}:{getattr(self, x)}" for x in self.__slots__])
-        return str(self.to_dict())
+#     def __repr__(self):
+#         # return "\n".join([f" {x}:{getattr(self, x)}" for x in self.__slots__])
+#         return str(self.to_dict())
 
-    def to_dict(self):
-        temp_dict = {}
-        for x in self.__slots__:
-            if isinstance(getattr(self, x), OutcomeCodes):
-                temp_dict[x] = str(getattr(self, x))
-            else:
-                temp_dict[x] = getattr(self, x)
-        return temp_dict
-        # return json.dumps(temp_dict)
+#     def to_dict(self):
+#         temp_dict = {}
+#         for x in self.__slots__:
+#             if isinstance(getattr(self, x), OutcomeCodes):
+#                 temp_dict[x] = str(getattr(self, x))
+#             else:
+#                 temp_dict[x] = getattr(self, x)
+#         return temp_dict
+#         # return json.dumps(temp_dict)
+
+
+# class OutcomeCodes(Enum):
+#     """An ENUM to contain the valid outcome_codes"""
+
+#     # fmt: off
+#     POSSIBLE_CORRUPTION_UNAMBIG      = "1:???"
+#     POSSIBLE_CORRUPTION_AMBIG        = "2:???"
+#     POSSIBLE_CORRUPTION              = "3:???"
+#     ANY_CORRUPTION_IS_SILENT         = "4:The corrupted form is the same as the original, is in release, and there is no alternative reconstruction"
+#     AMBIG_COULD_BE_SILENT = "5:???"
+#     NOT_PURE_DIGITS                  = "5:The code does not contain pure digits"
+#     NOT_16_TO_18_DIGITS              = "6:The code is not 16-18 digits"
+#     NOT_TRAILING_ZEROES              = "7:The code is long enough to be corrupted but does not have the correct pattern of trailing zeroes"
+#     NOT_RECONSTRUCTABLE              = "9:The code has 16 digits but digit 15 is neither 0 nor 1"
+#     NO_RECONSTRUCTIONS_EXIST          = "10:Neither the original nor any reconstruction is in release"
+#     # fmt: on
+
+
+from pydantic import BaseModel, field_serializer, ConfigDict, Field
 
 
 class OutcomeCodes(Enum):
     """An ENUM to contain the valid outcome_codes"""
 
     # fmt: off
-    POSSIBLE_CORRUPTION_UNAMBIG      = "1:???"
-    POSSIBLE_CORRUPTION_AMBIG        = "2:???"
-    POSSIBLE_CORRUPTION              = "3:???"
+    POSSIBLE_CORRUPTION_UNAMBIG      = "1:The sctid provided is invalid but can be reconstructed to a single form that is found in release"
+    POSSIBLE_CORRUPTION_AMBIG        = "2:The sctid provided is invalid and can be reconstructed to both a concept id and a description id that is found in release???"
+    POSSIBLE_CORRUPTION              = "3:This is a temporary outcome that indicates the sctid provided looks corrupted; should not occur once processing complete as is refined"
     ANY_CORRUPTION_IS_SILENT         = "4:The corrupted form is the same as the original, is in release, and there is no alternative reconstruction"
-    AMBIG_COULD_BE_SILENT = "5:???"
-    NOT_PURE_DIGITS                  = "5:The code does not contain pure digits"
-    NOT_16_TO_18_DIGITS              = "6:The code is not 16-18 digits"
-    NOT_TRAILING_ZEROES              = "7:The code is long enough to be corrupted but does not have the correct pattern of trailing zeroes"
-    NOT_RECONSTRUCTABLE              = "9:The code has 16 digits but digit 15 is neither 0 nor 1"
-    NO_RECONSTRUCTIONS_EXIST          = "10:Neither the original nor any reconstruction is in release"
+    AMBIG_COULD_BE_SILENT            = "5:The corrupted form is the same as the original, is in release, but there is also an alternative reconstruction"
+    NOT_PURE_DIGITS                  = "5:The sctid provided does not contain pure digits"
+    NOT_16_TO_18_DIGITS              = "6:The sctid provided is not 16-18 digits"
+    NOT_TRAILING_ZEROES              = "7:The sctid provided is long enough to be corrupted but does not have the correct pattern of trailing zeroes"
+    NOT_RECONSTRUCTABLE              = "9:The sctid provided has 16 digits but digit 15 is neither 0 nor 1"
+    NO_RECONSTRUCTIONS_EXIST          = "10:The sctid provided looks like it may be corrupted but neither the original nor any reconstruction is in release"
     # fmt: on
+
+    def to_dict(self):
+        return {"name": "OutcomeCodes." + self.name, "value": self.value}
+
+
+class CorruptionAnalysis(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+    sctid_provided: str = Field(str, max_length=20)
+    sctid_provided_stem: str | None = None
+    sctid_provided_trailing_zeroes: str | None = None
+    validity: bool | None = None
+    outcome_code: OutcomeCodes | None = None
+    r_cid: str | None = None
+    r_cid_stem: str | None = None
+    r_cid_trailing_zeroes: str | None = None
+    r_did: str | None = None
+    r_did_stem: str | None = None
+    r_did_trailing_zeroes: str | None = None
+    r_cid_pt: str | None = None
+    r_did_term: str | None = None
+    r_did_corresp_cid: str | None = None
+
+    @field_serializer("outcome_code")
+    def serialize_outcome_code(self, outcome_code: OutcomeCodes, _info):
+        return outcome_code.to_dict()
+        # return "OutcomeCodes." + outcome_code.name
 
 
 def analyse_sctid_for_corruption(
