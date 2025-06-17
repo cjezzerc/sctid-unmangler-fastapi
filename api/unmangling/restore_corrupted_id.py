@@ -8,7 +8,6 @@ import logging
 
 from . import checkdigit
 
-from ..terminology_server.terminology_server_module import TerminologyServer
 from .codes_in_release import (
     check_list_of_concept_ids_in_release_and_get_display,
     check_list_of_description_ids_in_release_and_get_concept_id_and_display,
