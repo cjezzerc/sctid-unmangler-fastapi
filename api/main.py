@@ -50,7 +50,7 @@ def health_check():
     return f"healthy at {datetime.datetime.now()}"
 
 
-@app.post("/receive_entered_data/")
+@app.post("/receive_entered_data")
 def receive_entered_data(received_data: ReceivedData):
     return {
         "check_results": check_entered_data(
