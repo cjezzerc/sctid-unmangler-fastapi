@@ -1,3 +1,4 @@
+import os
 import datetime
 
 from fastapi import FastAPI
@@ -18,10 +19,13 @@ logging.basicConfig(
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:5173",
-    "http://localhost:4173",
-]
+# CORS_ORIGINS env var should be comma separated string of URLs, e.g. 'http://localhost:5173,http://localhost:4173'
+if "CORS_ORIGINS" in os.environ:
+    origins=os.environ["CORS_ORIGINS"].split(",")
+else:
+    origins=[]
+
+logger.info(f"CORS origins: {origins}")
 
 app.add_middleware(
     CORSMiddleware,
