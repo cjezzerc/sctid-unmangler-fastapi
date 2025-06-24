@@ -1,7 +1,7 @@
 import os
 import datetime
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -51,8 +51,11 @@ def health_check():
 
 
 @app.post("/receive_entered_data")
-def receive_entered_data(received_data: ReceivedData):
+def receive_entered_data(request: Request, received_data: ReceivedData):
+    snomed_release=os.environ["DESCRIPTIONS_SQLLITE_FILE"].split("_")[-1][:-3]
+    logger.info(f"headers: {request.headers}")
     return {
+        "metadata": {"snomed_release":snomed_release},
         "check_results": check_entered_data(
             text=received_data.entered_text,
             did_ignore_flag=received_data.did_ignore_flag,
