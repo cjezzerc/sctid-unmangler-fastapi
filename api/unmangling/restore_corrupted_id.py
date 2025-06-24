@@ -110,7 +110,7 @@ class OutcomeCodes(Enum):
 
 class CorruptionAnalysis(BaseModel):
     model_config = ConfigDict(validate_assignment=True)
-    sctid_provided: str = Field(str, max_length=20)
+    sctid_provided: str | None = None
     sctid_provided_stem: str | None = None
     sctid_provided_trailing_zeroes: str | None = None
     validity: bool | None = None
