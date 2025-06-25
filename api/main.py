@@ -10,12 +10,12 @@ from .unmangling.check_entered_data import check_entered_data
 
 import logging
 
-logger = logging.getLogger("my_logger")
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s | %(levelname)-8s | "
-    "%(module)s:%(funcName)s:%(lineno)d - %(message)s",
-)
+logger = logging.getLogger("uvicorn.error")
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format="%(asctime)s | %(levelname)-8s | "
+#     "%(module)s:%(funcName)s:%(lineno)d - %(message)s",
+# )
 
 app = FastAPI()
 
