@@ -21,9 +21,9 @@ app = FastAPI()
 
 # CORS_ORIGINS env var should be comma separated string of URLs, e.g. 'http://localhost:5173,http://localhost:4173'
 if "CORS_ORIGINS" in os.environ:
-    origins=os.environ["CORS_ORIGINS"].split(",")
+    origins = os.environ["CORS_ORIGINS"].split(",")
 else:
-    origins=[]
+    origins = []
 
 logger.info(f"CORS origins: {origins}")
 
@@ -50,16 +50,22 @@ def health_check():
     return f"healthy at {datetime.datetime.now()}"
 
 
+@app.get("/snomed_release")
+def get_snomed_release():
+    snomed_release = os.environ["DESCRIPTIONS_SQLLITE_FILE"].split("_")[-1][:-3]
+    return snomed_release
+
+
 @app.post("/receive_entered_data")
 def receive_entered_data(request: Request, received_data: ReceivedData):
-    snomed_release=os.environ["DESCRIPTIONS_SQLLITE_FILE"].split("_")[-1][:-3]
+    snomed_release = os.environ["DESCRIPTIONS_SQLLITE_FILE"].split("_")[-1][:-3]
     logger.info(f"headers: {request.headers}")
     return {
-        "metadata": {"snomed_release":snomed_release},
+        "metadata": {"snomed_release": snomed_release},
         "check_results": check_entered_data(
             text=received_data.entered_text,
             did_ignore_flag=received_data.did_ignore_flag,
-        )
+        ),
     }
 
 
