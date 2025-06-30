@@ -11,11 +11,6 @@ from .unmangling.check_entered_data import check_entered_data
 import logging
 
 logger = logging.getLogger("uvicorn.error")
-# logging.basicConfig(
-#     level=logging.DEBUG,
-#     format="%(asctime)s | %(levelname)-8s | "
-#     "%(module)s:%(funcName)s:%(lineno)d - %(message)s",
-# )
 
 app = FastAPI()
 
@@ -34,10 +29,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-class ListOfIds(BaseModel):
-    ids: list
 
 
 class ReceivedData(BaseModel):
