@@ -2,12 +2,13 @@
 Functions and classes for detecting corruption of sctids and possible reconsructions
 """
 
-import re, json
+import re
 from enum import Enum
 import logging
 
-from . import checkdigit
+from pydantic import BaseModel, field_serializer, ConfigDict
 
+from . import checkdigit
 from .codes_in_release import (
     check_list_of_concept_ids_in_release_and_get_display,
     check_list_of_description_ids_in_release_and_get_concept_id_and_display,
@@ -15,9 +16,6 @@ from .codes_in_release import (
 from .parse_and_validate_sctid import ParsedSCTID
 
 logger = logging.getLogger()
-
-
-from pydantic import BaseModel, field_serializer, ConfigDict, Field
 
 
 class OutcomeCodes(Enum):
@@ -60,7 +58,6 @@ class CorruptionAnalysis(BaseModel):
     @field_serializer("outcome_code")
     def serialize_outcome_code(self, outcome_code: OutcomeCodes, _info):
         return outcome_code.to_dict()
-        # return "OutcomeCodes." + outcome_code.name
 
 
 def analyse_sctid_for_corruption(
@@ -68,7 +65,7 @@ def analyse_sctid_for_corruption(
 ):
     """
     Works out if sctid may be corrupted and if so create possible restored forms
-    No checking of releases is done here (so that can be batched)
+    No checking of releases is done here (so that release checking can be batched)
     """
 
     sctid = str(sctid)  # in case test with an int
@@ -168,20 +165,6 @@ def analyse_sctid_for_corruption(
                     corruption_analysis.outcome_code = OutcomeCodes.NOT_TRAILING_ZEROES
                     return corruption_analysis
 
-    # Now remove r_cid if it is the same as sctid
-    # The logic is a bit complicated around this part and can probably be expressed in
-    # a number of different ways.
-    # Already above the case of 16 digits with valid chk digit is dealt with
-    # as in that case no alernate type (i.e. cid or did) is possible.
-    # The code above as simple as possible and allows for the case
-    # the case of 17 or 18 digits where the corruption of a DID might be missed if assumed that a valid
-    # code ending in 00 (17 digits) or 000 (18 digits) were not corrupted.
-    # But it means that r_cid may in fact be identical to sctid hence the next check and removal.
-
-    # if n_digits in [17, 18] and corruption_analysis.r_cid == sctid:
-    #     # corruption_analysis.r_cid = None
-    #     corruption_analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_MAY_BE_SILENT_17_18
-    # else:
     corruption_analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION
 
     return corruption_analysis
