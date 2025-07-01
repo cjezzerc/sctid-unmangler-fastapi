@@ -1,0 +1,17 @@
+1) Tests should be run from the top level of the repo in order for imports to work correctly, using command
+
+   pytest
+
+2) The expected output is created using the corresponding scripts in the trial_scripts folder. 
+
+   These scripts in trial scripts must also be run from the top level of the repo, as e.g.
+
+   python -m api.unmangling.trial_scripts.trial_restore_corrupted_id
+
+   If the expected output changes (e.g. due to data model changes) the output from the trial script should be
+   pasted into the test script. Would be a good idea at some stage to be able to divert the expected output into 
+   a file and read that file into the test script rather than hard coding it. Possibly the test script could also be
+   modified so that it outputs the "expected output" although that is a bit circular. Whenever the data is created from a
+   trial script a human needs to check it still looks correct.
+
+NB really need to duplicate some of the tests to allow for ignore_did_flag = True or False

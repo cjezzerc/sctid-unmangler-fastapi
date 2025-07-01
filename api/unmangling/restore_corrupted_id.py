@@ -27,7 +27,7 @@ class OutcomeCodes(Enum):
     POSSIBLE_CORRUPTION              = "3:This is a temporary outcome that indicates the sctid provided looks corrupted; should not occur once processing complete as is refined"
     ANY_CORRUPTION_IS_SILENT         = "4:The corrupted form is the same as the original, is in release, and there is no alternative reconstruction"
     AMBIG_COULD_BE_SILENT            = "5:The corrupted form is the same as the original, is in release, but there is also an alternative reconstruction"
-    NOT_PURE_DIGITS                  = "5:The sctid provided does not contain pure digits"
+    NOT_PURE_DIGITS                  = "8:The sctid provided does not contain pure digits"
     NOT_16_TO_18_DIGITS              = "6:The sctid provided is not 16-18 digits"
     NOT_TRAILING_ZEROES              = "7:The sctid provided is long enough to be corrupted but does not have the correct pattern of trailing zeroes"
     NOT_RECONSTRUCTABLE              = "9:The sctid provided has 16 digits but digit 15 is neither 0 nor 1"
@@ -62,7 +62,7 @@ class CorruptionAnalysis(BaseModel):
 
 def analyse_sctid_for_corruption(
     sctid=None,
-):
+) -> CorruptionAnalysis:
     """
     Works out if sctid may be corrupted and if so create possible restored forms
     No checking of releases is done here (so that release checking can be batched)
@@ -242,7 +242,7 @@ def check_corruption_analyses_for_codes_in_release(
                 and (temp_r_cid == analysis.sctid_provided)
             ):
                 analysis.outcome_code = OutcomeCodes.AMBIG_COULD_BE_SILENT
-                analysis.r_cid = f"(!) {analysis.r_cid}"
-                analysis.r_cid_pt = f"(!) {analysis.r_cid_pt}"
+                # analysis.r_cid = f"(!) {analysis.r_cid}"
+                # analysis.r_cid_pt = f"(!) {analysis.r_cid_pt}"
 
     return analyses_list

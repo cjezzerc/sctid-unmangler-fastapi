@@ -25,12 +25,10 @@ for sctid in [
     "10093501000001100",  # ambiguous - 10093501000001107 and 10093501000001111 both exist
     "999001741000000000",  # ambiguous - 999001741000000107 and 999001741000000111 both exist
 ]:
-    print(sctid)
     results = restore_corrupted_id.analyse_sctid_for_corruption(
         sctid=sctid
     )
-    analyses_list.append(results)
+    
+    analyses_list.append(results.model_dump())
 
-print(analyses_list)
-print()
 pprint.pprint(analyses_list)

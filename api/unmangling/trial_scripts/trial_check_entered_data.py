@@ -1,7 +1,8 @@
+import pprint
+
 from .. import check_entered_data
 
-text = """
-    123456789012345  #  (15)
+text = """123456789012345  #  (15)
     1234567890123456789  #  (19)
     S23456789012345678  # (18, not all digits)
     1082551000000100  # 1082551000000105 (16)
@@ -18,6 +19,6 @@ text = """
     10093501000001100  # ambiguous - 10093501000001107 and 10093501000001111 both exist
     999001741000000000  # ambiguous - 999001741000000107 and 999001741000000111 both exist"""
 
-results = check_entered_data.check_entered_data(text=text)
+results = check_entered_data.check_entered_data(text=text, did_ignore_flag=False)
 
-print(results)
+pprint.pprint(results)

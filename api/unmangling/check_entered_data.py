@@ -11,6 +11,7 @@ from .restore_corrupted_id import (
 )
 from . import add_stem_and_trailing_digits
 
+
 def parse_line(line=None):
     f = re.split(r"[\|\s]", line.strip())
     if f != []:
@@ -25,10 +26,11 @@ def check_entered_data(
     text: str = None,
     did_ignore_flag: bool = True,
 ):
-    other_data = (
-        []
-    )  # these two lists will correspond element by element to each line of input
+    # fmt:off
+    other_data    = []  # these two lists will correspond element by element to each line of input
     analyses_list = []  # and are combined at end into the final results list
+    # fmt:on
+
     for i_line, line in enumerate(text.split("\n")):
         sctid, rest_of_line = parse_line(line)
 
