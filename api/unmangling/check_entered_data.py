@@ -38,7 +38,7 @@ def check_entered_data(
         analyses_list.append(corruption_analysis)
         other_data.append({"rest_of_line": rest_of_line, "react_key": i_line})
 
-    analyses_list = check_corruption_analyses_for_codes_in_release(
+    check_corruption_analyses_for_codes_in_release(
         analyses_list=analyses_list,
         did_ignore_flag=did_ignore_flag,
     )
