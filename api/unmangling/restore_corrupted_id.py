@@ -200,7 +200,6 @@ def check_corruption_analyses_for_codes_in_release(
 
     for analysis in analyses_list:
         if analysis.outcome_code == OutcomeCodes.POSSIBLE_CORRUPTION:
-            temp_r_cid = analysis.r_cid
 
             if analysis.r_cid is not None:
                 in_release, pt = results_dict_cid[analysis.r_cid]
@@ -230,14 +229,14 @@ def check_corruption_analyses_for_codes_in_release(
             if (
                 (analysis.r_cid is not None)
                 and (analysis.r_did is None)
-                and (temp_r_cid == analysis.sctid_provided)
+                and (analysis.r_cid == analysis.sctid_provided)
             ):
                 analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_IS_SILENT
 
             if (
                 (analysis.r_cid is not None)
                 and (analysis.r_did is not None)
-                and (temp_r_cid == analysis.sctid_provided)
+                and (analysis.r_cid == analysis.sctid_provided)
             ):
                 analysis.outcome_code = OutcomeCodes.AMBIG_COULD_BE_SILENT
                 
