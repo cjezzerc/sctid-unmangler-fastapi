@@ -216,6 +216,12 @@ def check_corruption_analyses_for_codes_in_release(
                 else:
                     analysis.r_did = None
 
+
+def refine_outcome_codes(
+    analyses_list: list[CorruptionAnalysis] = None,
+):
+    for analysis in analyses_list:
+        if analysis.outcome_code == OutcomeCodes.POSSIBLE_CORRUPTION:
             # refine outcome code
             if (analysis.r_cid is not None) ^ (analysis.r_did is not None):
                 analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION_UNAMBIG

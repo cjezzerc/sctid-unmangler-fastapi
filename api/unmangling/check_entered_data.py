@@ -8,6 +8,7 @@ import re
 from .restore_corrupted_id import (
     analyse_sctid_for_corruption,
     check_corruption_analyses_for_codes_in_release,
+    refine_outcome_codes,
 )
 from . import add_stem_and_trailing_digits
 
@@ -41,6 +42,10 @@ def check_entered_data(
     check_corruption_analyses_for_codes_in_release(
         analyses_list=analyses_list,
         did_ignore_flag=did_ignore_flag,
+    )
+
+    refine_outcome_codes(
+        analyses_list=analyses_list,
     )
 
     for analysis in analyses_list:
