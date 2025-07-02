@@ -222,17 +222,20 @@ def refine_outcome_codes(
 ):
     for analysis in analyses_list:
         if analysis.outcome_code == OutcomeCodes.POSSIBLE_CORRUPTION:
-            
+
             if (analysis.r_cid is not None) ^ (analysis.r_did is not None):
                 analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION_UNAMBIG
 
-                if analysis.r_cid == analysis.sctid_provided:
+                if (analysis.r_cid == analysis.sctid_provided) or (
+                    analysis.r_did == analysis.sctid_provided # this case can only happen for 16 digits
+                ):
                     analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_IS_SILENT
 
             elif (analysis.r_cid is not None) and (analysis.r_did is not None):
                 analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION_AMBIG
 
-                if analysis.r_cid == analysis.sctid_provided:
+                if analysis.r_cid == analysis.sctid_provided: # no need to check for r_did because can only happen for 16 digits
+                                                              # and 16 digits can never be ambiguous
                     analysis.outcome_code = OutcomeCodes.AMBIG_COULD_BE_SILENT
 
             else:  # i.e. (analysis.r_cid is None) and (analysis.r_did is None):
