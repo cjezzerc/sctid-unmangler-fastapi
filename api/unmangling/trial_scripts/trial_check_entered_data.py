@@ -23,7 +23,9 @@ text = """1082551000000105	16 digits; does not have appropriate pattern of trail
 999001741000000000	18 digits; can be reconstructed to both a Concept and a Description Id (provided allow Description Ids)
 900000000000497000	18 digits; although ends in 000, the provided ID exists in the release, and it is a Concept Id. Hence "silent". (No equivalent case can exist for a Description Id for 18 digits). Because starts 90000 is a "short form" case so penpenultimate digit is 0. Silent cases for 18 digits can only be the 90000 forms as otherwise digit 16 is a 1 so cannot be silent. (To date there are only 10 such cases.)
 900000000000478000	17 digits; although ends in 000, the provided ID exists in the release, and it is a Concept Id. Hence "silent". Silent cases for 18 digits can only be the 90000 forms as otherwise digit 16 is a 1 so cannot be silent. (To date there are only 10 such cases.)  However it can also be reconstructed to be a Description ID (provided allow Description IDs) so is ambiguous in that case. (To date there are only 3 such cases)
-145670821000119000	18 digits; ends in 000 but no reconstruction exists in the release""" 
+145670821000119000	18 digits; ends in 000 but no reconstruction exists in the release
+125605004	        Not 16-18 digits
+S1082551000000105	Not purely digits""" 
 
 results = check_entered_data.check_entered_data(text=text, did_ignore_flag=False)
 

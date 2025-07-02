@@ -23,7 +23,9 @@ def test_check_entered_data():
 999001741000000000	18 digits; can be reconstructed to both a Concept and a Description Id (provided allow Description Ids)
 900000000000497000	18 digits; although ends in 000, the provided ID exists in the release, and it is a Concept Id. Hence "silent". (No equivalent case can exist for a Description Id for 18 digits). Because starts 90000 is a "short form" case so penpenultimate digit is 0. Silent cases for 18 digits can only be the 90000 forms as otherwise digit 16 is a 1 so cannot be silent. (To date there are only 10 such cases.)
 900000000000478000	17 digits; although ends in 000, the provided ID exists in the release, and it is a Concept Id. Hence "silent". Silent cases for 18 digits can only be the 90000 forms as otherwise digit 16 is a 1 so cannot be silent. (To date there are only 10 such cases.)  However it can also be reconstructed to be a Description ID (provided allow Description IDs) so is ambiguous in that case. (To date there are only 3 such cases)
-145670821000119000	18 digits; ends in 000 but no reconstruction exists in the release"""
+145670821000119000	18 digits; ends in 000 but no reconstruction exists in the release
+125605004	        Not 16-18 digits
+S1082551000000105	Not purely digits"""
 
     results = check_entered_data.check_entered_data(text=text, did_ignore_flag=False)
 
@@ -726,5 +728,52 @@ def test_check_entered_data():
                 "rest_of_line": "\t18 digits; ends in 000 but no "
                 "reconstruction exists in the release",
             },
+        },
+        {
+            "corruption_analysis": {
+                "outcome_code": {
+                    "name": "OutcomeCodes.NOT_16_TO_18_DIGITS",
+                    "value": "6:The sctid provided is " "not 16-18 digits",
+                },
+                "r_cid": None,
+                "r_cid_pt": None,
+                "r_cid_stem": None,
+                "r_cid_trailing_zeroes": None,
+                "r_did": None,
+                "r_did_corresp_cid": None,
+                "r_did_stem": None,
+                "r_did_term": None,
+                "r_did_trailing_zeroes": None,
+                "sctid_provided": "125605004",
+                "sctid_provided_stem": "125605004",
+                "sctid_provided_trailing_zeroes": "",
+                "validity": True,
+            },
+            "other_data": {
+                "react_key": 22,
+                "rest_of_line": "\t        Not 16-18 digits",
+            },
+        },
+        {
+            "corruption_analysis": {
+                "outcome_code": {
+                    "name": "OutcomeCodes.NOT_PURE_DIGITS",
+                    "value": "8:The sctid provided does " "not contain pure digits",
+                },
+                "r_cid": None,
+                "r_cid_pt": None,
+                "r_cid_stem": None,
+                "r_cid_trailing_zeroes": None,
+                "r_did": None,
+                "r_did_corresp_cid": None,
+                "r_did_stem": None,
+                "r_did_term": None,
+                "r_did_trailing_zeroes": None,
+                "sctid_provided": "S1082551000000105",
+                "sctid_provided_stem": "S10825510000001",
+                "sctid_provided_trailing_zeroes": "05",
+                "validity": False,
+            },
+            "other_data": {"react_key": 23, "rest_of_line": "\tNot purely digits"},
         },
     ]
