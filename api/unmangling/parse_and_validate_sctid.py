@@ -1,4 +1,7 @@
-"""class to parse a SCTID and check its validity"""
+"""
+class to parse a SCTID and check its validity
+code taken from setchecks app and probably more functionality than needed in code-restorer
+"""
 
 import re
 

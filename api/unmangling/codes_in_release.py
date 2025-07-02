@@ -8,10 +8,6 @@ Uses a simple sqllite database for speed
 import os
 import sqlite3
 
-import logging
-
-logger = logging.getLogger()
-
 def check_list_of_concept_ids_in_release_and_get_display(
     concept_id_list=None,
 ):
@@ -40,7 +36,7 @@ def check_list_of_concept_ids_in_release_and_get_display(
                 results_dict[concept_id] = (False, None)
         return results_dict
 
-def check_list_of_description_ids_in_release_and_get_concept_id_and_display(
+def check_list_of_description_ids_in_release_and_get_term_and_concept_id(
     description_id_list=None,
 ):
     """
@@ -55,11 +51,8 @@ def check_list_of_description_ids_in_release_and_get_concept_id_and_display(
         sql_string = f"""
             SELECT * FROM descriptions WHERE description_id IN ( {description_id_list_string} )
             """
-        try:
-            cursor.execute(sql_string)
-        except Exception as e:
-            logger.error(f"SQL threw error {e}")
-            return None
+        
+        cursor.execute(sql_string)
         
         temp_dict = {did: (term, cid) for did, term, cid in cursor.fetchall()}
         results_dict = {}

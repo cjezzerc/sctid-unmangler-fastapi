@@ -3,7 +3,7 @@ functions to assist UI by providing extra substrings of the stem
 and trailing zeroes of the provided sctid and of reconstructions
 """
 
-from .restore_corrupted_id import CorruptionAnalysis
+from .corruption_analysis import CorruptionAnalysis
 
 
 def do_one(sctid=None):

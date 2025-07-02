@@ -5,12 +5,12 @@ and returns corruption analysis
 
 import re
 
-from .restore_corrupted_id import (
-    analyse_sctid_for_corruption,
+from .analyse_sctid_for_corruption import analyse_sctid_for_corruption
+from .refine_outcome_codes import refine_outcome_codes
+from .add_stem_and_trailing_digits import add_stem_and_trailing_digits
+from .check_corruption_analyses_for_codes_in_release import (
     check_corruption_analyses_for_codes_in_release,
-    refine_outcome_codes,
 )
-from . import add_stem_and_trailing_digits
 
 
 def parse_line(line=None):
@@ -49,7 +49,7 @@ def check_entered_data(
     )
 
     for analysis in analyses_list:
-        add_stem_and_trailing_digits.add_stem_and_trailing_digits(analysis=analysis)
+        add_stem_and_trailing_digits(analysis=analysis)
 
     results = []  # this holds the corresponding elements from
     #               other_data and analyses_list
