@@ -222,27 +222,19 @@ def refine_outcome_codes(
 ):
     for analysis in analyses_list:
         if analysis.outcome_code == OutcomeCodes.POSSIBLE_CORRUPTION:
-            # refine outcome code
+            
             if (analysis.r_cid is not None) ^ (analysis.r_did is not None):
                 analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION_UNAMBIG
 
-            if (analysis.r_cid is not None) and (analysis.r_did is not None):
+                if analysis.r_cid == analysis.sctid_provided:
+                    analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_IS_SILENT
+
+            elif (analysis.r_cid is not None) and (analysis.r_did is not None):
                 analysis.outcome_code = OutcomeCodes.POSSIBLE_CORRUPTION_AMBIG
 
-            if (analysis.r_cid is None) and (analysis.r_did is None):
+                if analysis.r_cid == analysis.sctid_provided:
+                    analysis.outcome_code = OutcomeCodes.AMBIG_COULD_BE_SILENT
+
+            else:  # i.e. (analysis.r_cid is None) and (analysis.r_did is None):
+                assert (analysis.r_cid is None) and (analysis.r_did is None)
                 analysis.outcome_code = OutcomeCodes.NO_RECONSTRUCTIONS_EXIST
-
-            if (
-                (analysis.r_cid is not None)
-                and (analysis.r_did is None)
-                and (analysis.r_cid == analysis.sctid_provided)
-            ):
-                analysis.outcome_code = OutcomeCodes.ANY_CORRUPTION_IS_SILENT
-
-            if (
-                (analysis.r_cid is not None)
-                and (analysis.r_did is not None)
-                and (analysis.r_cid == analysis.sctid_provided)
-            ):
-                analysis.outcome_code = OutcomeCodes.AMBIG_COULD_BE_SILENT
-                
