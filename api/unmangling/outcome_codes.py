@@ -13,7 +13,7 @@ class OutcomeCodes(Enum):
     NOT_16_TO_18_DIGITS              = "6:The sctid provided is not 16-18 digits"
     NOT_TRAILING_ZEROES              = "7:The sctid provided is long enough to be corrupted but does not have the correct pattern of trailing zeroes"
     NOT_RECONSTRUCTABLE              = "9:The sctid provided has 16 digits but digit 15 is neither 0 nor 1"
-    NO_RECONSTRUCTIONS_EXIST          = "10:The sctid provided looks like it may be corrupted but neither the original nor any reconstruction is in release"
+    NO_RECONSTRUCTIONS_EXIST         = "10:The sctid provided looks like it may be corrupted but neither the original nor any reconstruction is in release"
     # fmt: on
 
     def to_dict(self):

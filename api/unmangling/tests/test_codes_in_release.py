@@ -15,7 +15,7 @@ def test_concepts():
 
 def test_descriptions():
 
-    results_dict = codes_in_release.check_list_of_description_ids_in_release_and_get_concept_id_and_display(
+    results_dict = codes_in_release.check_list_of_description_ids_in_release_and_get_term_and_concept_id(
         description_id_list=["509466017", "509466017999"],
     )
     assert results_dict == {
